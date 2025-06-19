@@ -2,29 +2,35 @@
 
 ## Problem Statement
 
-A global health research team wanted to understand the spread and impact of the COVID-19 pandemic across countries, regions, and income groups. The goal was to use both SQL and Power BI to create a unified analytical solution that provides dynamic insights into infection rates, death rates, healthcare infrastructure, and socio-economic disparities.
+An analysis of countries conditions during COVID-19 and how they dealt with it. The goal was to use both SQL and Power BI to create a unified analytical solution that provides dynamic insights into infection rates, death rates, healthcare infrastructure, and socio-economic disparities.
 
 ## Data Sources
 
 * **Covid Deaths & Vaccinations**: Our World In Data (OWID)
-* **Macroeconomic Data**: World Bank & OWID metadata
+https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv
+
+The above is a open COVID-19 dataset which I divided into 2 parts - CovidDeaths and CovidVaccinations
 
 ---
 
+##Dashboard Snapshot
+
+![Dashboard Snapshot](Snapshots/Dashboard.jpeg)
+
 ## SQL Workflow: Data Cleaning & Preparation
 
-### Step 1: Loaded raw CSV files into SQL Server using SSMS
+### Step 1: Loaded raw EXCEL files into SQL Server using SSMS
 
-* covid\_deaths.csv
-* covid\_vaccinations.csv
+* covid\_deaths.xlxs
+* covid\_vaccinations.xlxs
 
 ### Step 2: Data Cleaning in SQL
 
 * Checked column data types and corrected where necessary
 * Replaced NULLs with 0s for numeric columns like `new_cases`, `new_deaths`
-* Created lookup table `RealCountries` to filter out non-country entities
 
-### Step 3: Created KPIs using SQL Views
+
+### Step 3: Created KPIs using SQL Views like-
 
 ```sql
 CREATE VIEW TotalCases AS
@@ -40,15 +46,6 @@ WHERE location IN (SELECT Country FROM RealCountries)
 GROUP BY location;
 ```
 
-### Step 4: Additional Calculated Fields in SQL
-
-* Death Rate = TotalDeaths / TotalCases
-* Likelihood of Getting Infected = TotalCases / Population
-* Hospital Beds per Thousand (from metadata)
-
-These were exported into Power BI for further visual analysis.
-
----
 
 ## Power BI Dashboard: Visual Analytics
 
@@ -57,7 +54,7 @@ These were exported into Power BI for further visual analysis.
 * Imported cleaned SQL tables and views into Power BI
 * Related tables using common keys (`location`, `date`)
 
-### Step 2: DAX Measures for KPIs
+### Step 2: DAX Measures for KPIs like-
 
 ```DAX
 TotalCases = CALCULATE(SUM(CovidDeaths[new_cases]), TREATAS(VALUES(RealCountries[Country]), CovidDeaths[location]))
@@ -121,19 +118,7 @@ MaxDeathsCountry = CALCULATE(MAX(CovidDeaths[location]), TOPN(1, SUMMARIZE(Covid
 * **Total Cases vs Deaths by Year**: Sharp peak in 2021–22
 * **By Continent**: Europe and Asia had the highest death tolls
 * **By Income Group**: High and upper-middle-income countries faced the brunt of total deaths
-* **Top 5 Economies**: USA consistently showed highest % population dead; India showed steep drops post 2021
+* The last two trends could lead to a speculation that proper accounting of cases and deaths relating to COVID-19 might not have been done properly in groups with poor financial situations, which could be used to explain as to why total deaths and total cases in Africa are so low.
+* **Top 5 Economies**: USA consistently showed highest % population dead and infected which shows their unpreparedness; India showed steep drops post 2021
 
 ---
-
-## Conclusion
-
-This project bridges **data engineering** (via SQL) and **visual analytics** (via Power BI) to extract actionable insights from the COVID-19 pandemic. It highlights disparities by income, tracks temporal patterns, and showcases country-wise impacts using interactive and dynamic charts.
-
----
-
-## Deliverables
-
-* Power BI Dashboard (PBIX)
-* SQL Scripts for cleaning and aggregations
-* PDF Export / PNGs for portfolio
-* README Documentation ✅
